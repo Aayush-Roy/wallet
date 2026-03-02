@@ -69,8 +69,8 @@ import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 
 
-// const API_URL = "https://wallet-api-cxqp.onrender.com/api";
-const API_URL="http://192.168.1.40:3000/api"
+const API_URL = "https://wallet-90bi.onrender.com/api";
+// const API_URL="http://192.168.1.40:3000/api"
 
 export const useTransactions = (userId) => {
   const [transactions, setTransactions] = useState([]);
@@ -91,7 +91,33 @@ export const useTransactions = (userId) => {
       console.error("Error fetching transactions:", error);
     }
   }, [userId]);
+  
+  const createTransaction = async (data) => {
+  try {
+    const response = await fetch(`${API_URL}/transactions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
+    const resData = await response.json();
+
+    if (!response.ok) {
+      console.log("API ERROR:", resData);
+      throw new Error(resData?.message || "Failed to create transaction");
+    }
+
+    // reload data after create
+    await loadData();
+
+    return resData;
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    throw error;
+  }
+};
   const fetchSummary = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/transactions/summary/${userId}`);
@@ -130,5 +156,5 @@ export const useTransactions = (userId) => {
     }
   };
 
-  return { transactions, summary, isLoading, loadData, deleteTransaction };
+  return { transactions, summary, isLoading, loadData, deleteTransaction,createTransaction };
 };
